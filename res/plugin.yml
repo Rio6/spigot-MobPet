@@ -1,0 +1,15 @@
+name: MobPet
+main: net.rio.MobPetPlugin
+version: 0.2
+description: "Pet any mob"
+author: "R26"
+
+permissions:
+    pet.command:
+        default: true
+    pet.ownpet:
+        default: true
+commands:
+    petlist:
+        usage: "Usage: /<command> [player]"
+        permission: pet.command
