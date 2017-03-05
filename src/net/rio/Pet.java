@@ -14,11 +14,14 @@ import org.bukkit.World;
 
 import net.minecraft.server.v1_11_R1.EntityInsentient;
 import net.minecraft.server.v1_11_R1.EntityCreature;
+import net.minecraft.server.v1_11_R1.EntityCreeper;
 import net.minecraft.server.v1_11_R1.EntityLiving;
 import net.minecraft.server.v1_11_R1.EntityHuman;
 import net.minecraft.server.v1_11_R1.IRangedEntity;
 import net.minecraft.server.v1_11_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_11_R1.PathfinderGoalSwell;
 import net.minecraft.server.v1_11_R1.PathfinderGoalLookAtPlayer;
+import net.minecraft.server.v1_11_R1.PathfinderGoalFloat;
 import net.minecraft.server.v1_11_R1.PathfinderGoalMeleeAttack;
 import net.minecraft.server.v1_11_R1.PathfinderGoalArrowAttack;
 import org.bukkit.craftbukkit.v1_11_R1.entity.CraftEntity;
@@ -205,7 +208,10 @@ public class Pet implements Listener {
             //this code clears fields B, C. so right now the mob wont walk
         } catch (Exception e) {e.printStackTrace();}
 
-        c.goalSelector.a(8, new PathfinderGoalLookAtPlayer(c, EntityHuman.class, 0.0F));
+        c.goalSelector.a(0, new PathfinderGoalFloat(c));
+        c.goalSelector.a(1, new PathfinderGoalLookAtPlayer(c, EntityHuman.class, 0.0F));
+        if(ent instanceof Creeper)
+            c.goalSelector.a(2, new PathfinderGoalSwell((EntityCreeper) c));
 
         if(c instanceof IRangedEntity)
             c.goalSelector.a(2, new PathfinderGoalArrowAttack((IRangedEntity) c, 1.0D, 20, 16F));
