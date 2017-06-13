@@ -214,7 +214,10 @@ public class Pet implements Listener {
             c.goalSelector.a(2, new PathfinderGoalSwell((EntityCreeper) c));
 
         if(c instanceof IRangedEntity)
-            c.goalSelector.a(2, new PathfinderGoalArrowAttack((IRangedEntity) c, 1.0D, 20, 16F));
+            if(ent instanceof Skeleton)
+                c.goalSelector.a(2, new PathfinderGoalBowShoot((EntitySkeleton) c, 1.0D, 20, 16F));
+            else
+                c.goalSelector.a(2, new PathfinderGoalArrowAttack((IRangedEntity) c, 1.0D, 20, 16F));
         else
             c.goalSelector.a(2, new PathfinderGoalMeleeAttack(c, 1.0D, false));
 
