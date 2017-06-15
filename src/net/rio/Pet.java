@@ -44,9 +44,9 @@ public class Pet implements Listener {
         this.plugin = plugin;
 
         plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
-            for(String k : getPetList()) {
+            for(UUID k : getPetList()) {
 
-                Entity pet = getEntityById(k);
+                Entity pet = plugin.getServer().getEntity(k);
                 Entity owner = plugin.getServer().getPlayer(UUID.fromString(((String) plugin.getConfig().get(configPath + "." + k))));
 
                 if(pet != null && owner != null) {
@@ -105,8 +105,8 @@ public class Pet implements Listener {
     @EventHandler
     public void onEntityDeath(EntityDeathEvent eve) {
         Entity target = eve.getEntity();
-        for(String k : getPetList()) {
-            Entity e = getEntityById(k);
+        for(UUID k : getPetList()) {
+            Entity e = plugin.getServer().getEntity(k);
             if(e != null) {
                 EntityInsentient pet = (EntityInsentient) ((CraftEntity) e).getHandle();
                 if(pet.getGoalTarget() == (EntityLiving) ((CraftEntity) target).getHandle()) {
@@ -119,7 +119,7 @@ public class Pet implements Listener {
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent eve) {
         Entity ent = eve.getEntity();
-        if(ent instanceof Creature && getPetList().contains(ent.getUniqueId().toString())) {
+        if(ent instanceof Creature && getPetList().contains(ent.getUniqueId())) {
             overrideBehavior((LivingEntity) ent);
         }
     }
@@ -135,7 +135,7 @@ public class Pet implements Listener {
             if((owner.getInventory().getItemInMainHand().getType() == Material.MELON ||
                         owner.getInventory().getItemInOffHand().getType() == Material.MELON) &&
                     pet instanceof LivingEntity &&
-                    !getPetList().contains(pet.getUniqueId().toString())) {
+                    !getPetList().contains(pet.getUniqueId())) {
                 if(pet instanceof Creature)
                     overrideBehavior((LivingEntity) pet);
                 plugin.getConfig().set(configPath + "." + pet.getUniqueId().toString(), owner.getUniqueId().toString());
@@ -147,27 +147,15 @@ public class Pet implements Listener {
         }
     }
 
-    public Entity getEntityById(String id) {
-        for(World w : plugin.getServer().getWorlds()) {
-            List<Entity> ents = w.getEntities();
-            for(Entity e : ents) {
-                if(e.getUniqueId().toString().equals(id)) {
-                    return e;
-                }
-            }
-        }
-        return null;
-    }
-
     /*
      * Remove dead or non-exist entities from config
      */
     public void cleanPets() {
-        for(String k : getPetList()) {
-            Entity e = getEntityById(k);
+        for(UUID k : getPetList()) {
+            Entity e = plugin.getServer().getEntity(k);
             if(e == null || e.isDead()) {
-                plugin.getLogger().info("Removing " + k);
-                plugin.getConfig().set(configPath + "." + k, null);
+                plugin.getLogger().info("Removing " + k.toString());
+                plugin.getConfig().set(configPath + "." + k.toString(), null);
             }
         }
     }
@@ -175,12 +163,12 @@ public class Pet implements Listener {
     /*
      * Returns a list of entities in config file
      */
-    public List<String> getPetList() {
-        List<String> list = new ArrayList<>();
+    public List<UUID> getPetList() {
+        List<UUID> list = new ArrayList<>();
         MemorySection memSec = (MemorySection) plugin.getConfig().get(configPath);
         if(memSec != null) {
             for(String k : memSec.getKeys(false)) {
-                list.add(k);
+                list.add(UUID.fromString(k));
             }
         }
         return list;
@@ -232,8 +220,8 @@ public class Pet implements Listener {
      */
     private void attackEntity(Player player, Entity target) {
         if(player == null || target == null) return;
-        for(String k : getPetList()) {
-            Entity e = getEntityById(k);
+        for(UUID k : getPetList()) {
+            Entity e = plugin.getServer().getEntity(k);
             if( e != null && player.getUniqueId().toString().equals((String) plugin.getConfig().get(configPath + "." + k)) &&
                     !target.getUniqueId().toString().equals(k)) {
                 ((EntityInsentient) ((CraftEntity) e).getHandle()).setGoalTarget((EntityLiving) ((CraftEntity) target).getHandle(),
