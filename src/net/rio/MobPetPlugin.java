@@ -5,6 +5,8 @@ import org.bukkit.configuration.*;
 import org.bukkit.entity.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.UUID;
+
 public class MobPetPlugin extends JavaPlugin {
 
     private Pet petControll;
@@ -39,9 +41,9 @@ public class MobPetPlugin extends JavaPlugin {
                 return false;
             }
             int i = 0;
-            for(String k : petControll.getPetList()) {
-                Entity pet = petControll.getEntityById(k);
-                if(pet != null && p.getUniqueId().toString().equals(petControll.getOwnerId(k))) {
+            for(UUID k : petControll.getPetList()) {
+                Entity pet = getServer().getEntity(k);
+                if(pet != null && p.getUniqueId().toString().equals(petControll.getOwnerId(k.toString()))) {
                     sender.sendMessage(pet.getName() + ": " + pet.toString());
                     i++;
                 }
