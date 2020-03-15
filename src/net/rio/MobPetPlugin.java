@@ -43,7 +43,7 @@ public class MobPetPlugin extends JavaPlugin {
             int i = 0;
             for(UUID k : petControll.getPetList()) {
                 Entity pet = getServer().getEntity(k);
-                if(pet != null && p.getUniqueId().toString().equals(petControll.getOwnerId(k.toString()))) {
+                if(pet != null && p.getUniqueId().equals(petControll.getOwnerId(k))) {
                     sender.sendMessage(pet.getName() + ": " + pet.toString());
                     i++;
                 }

@@ -12,21 +12,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.World;
 
-import net.minecraft.server.v1_12_R1.EntityCreature;
-import net.minecraft.server.v1_12_R1.EntityCreeper;
-import net.minecraft.server.v1_12_R1.EntityHuman;
-import net.minecraft.server.v1_12_R1.EntityInsentient;
-import net.minecraft.server.v1_12_R1.EntityLiving;
-import net.minecraft.server.v1_12_R1.EntitySkeleton;
-import net.minecraft.server.v1_12_R1.IRangedEntity;
-import net.minecraft.server.v1_12_R1.PathfinderGoalArrowAttack;
-import net.minecraft.server.v1_12_R1.PathfinderGoalBowShoot;
-import net.minecraft.server.v1_12_R1.PathfinderGoalFloat;
-import net.minecraft.server.v1_12_R1.PathfinderGoalLookAtPlayer;
-import net.minecraft.server.v1_12_R1.PathfinderGoalMeleeAttack;
-import net.minecraft.server.v1_12_R1.PathfinderGoalSelector;
-import net.minecraft.server.v1_12_R1.PathfinderGoalSwell;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
+import net.minecraft.server.v1_15_R1.EntityCreature;
+import net.minecraft.server.v1_15_R1.EntityCreeper;
+import net.minecraft.server.v1_15_R1.EntityHuman;
+import net.minecraft.server.v1_15_R1.EntityInsentient;
+import net.minecraft.server.v1_15_R1.EntityLiving;
+import net.minecraft.server.v1_15_R1.EntitySkeleton;
+import net.minecraft.server.v1_15_R1.IRangedEntity;
+import net.minecraft.server.v1_15_R1.PathfinderGoalArrowAttack;
+import net.minecraft.server.v1_15_R1.PathfinderGoalBowShoot;
+import net.minecraft.server.v1_15_R1.PathfinderGoalFloat;
+import net.minecraft.server.v1_15_R1.PathfinderGoalLookAtPlayer;
+import net.minecraft.server.v1_15_R1.PathfinderGoalMeleeAttack;
+import net.minecraft.server.v1_15_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_15_R1.PathfinderGoalSwell;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 
 import com.google.common.collect.Sets;
 import java.lang.reflect.*;
@@ -136,9 +136,9 @@ public class Pet implements Listener {
                         owner.getInventory().getItemInOffHand().getType() == Material.MELON) &&
                     pet instanceof LivingEntity &&
                     !getPetList().contains(pet.getUniqueId())) {
+                plugin.getConfig().set(configPath + "." + pet.getUniqueId().toString(), owner.getUniqueId().toString());
                 if(pet instanceof Creature)
                     overrideBehavior((LivingEntity) pet);
-                plugin.getConfig().set(configPath + "." + pet.getUniqueId().toString(), owner.getUniqueId().toString());
                 for(int i = 0; i < 5; i++)
                     pet.getWorld().spawnParticle(Particle.HEART, pet.getLocation().add(Math.random() - .5, Math.random(), Math.random() -.5), 1);
                     }
@@ -177,25 +177,21 @@ public class Pet implements Listener {
     /*
      * Returns the owner id of the pet in config
      */
-    public String getOwnerId(String petId) {
-        return (String) plugin.getConfig().get(configPath + "." + petId);
+    public UUID getOwnerId(UUID petId) {
+        String id = (String) plugin.getConfig().get(configPath + "." + petId.toString());
+        if(id == null) return null;
+        return UUID.fromString(id);
     }
 
     private void overrideBehavior(LivingEntity ent) {
         EntityCreature c = (EntityCreature) ((EntityInsentient)((CraftEntity) ent).getHandle());
 
-        //This gets the EntityCreature, we need it to change the values
-
+        // Clear original goals
         try {
-            Field bField = PathfinderGoalSelector.class.getDeclaredField("b");
-            bField.setAccessible(true);
-            Field cField = PathfinderGoalSelector.class.getDeclaredField("c");
-            cField.setAccessible(true);
-            bField.set(c.goalSelector, Sets.newLinkedHashSet());
-            bField.set(c.targetSelector, Sets.newLinkedHashSet());
-            cField.set(c.goalSelector, Sets.newLinkedHashSet());
-            cField.set(c.targetSelector, Sets.newLinkedHashSet());
-            //this code clears fields B, C. so right now the mob wont walk
+            Field goalsSet = PathfinderGoalSelector.class.getDeclaredField("d");
+            goalsSet.setAccessible(true);
+            goalsSet.set(c.goalSelector, Sets.newLinkedHashSet());
+            goalsSet.set(c.targetSelector, Sets.newLinkedHashSet());
         } catch (Exception e) {e.printStackTrace();}
 
         c.goalSelector.a(0, new PathfinderGoalFloat(c));
@@ -211,7 +207,7 @@ public class Pet implements Listener {
         else
             c.goalSelector.a(2, new PathfinderGoalMeleeAttack(c, 1.0D, false));
 
-        c.setGoalTarget(null, EntityTargetEvent.TargetReason.CUSTOM, false);
+        c.setGoalTarget(null);
 
     }
 
